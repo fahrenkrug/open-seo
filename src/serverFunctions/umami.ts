@@ -199,3 +199,46 @@ export const getUmamiDashboardReport = createServerFn({ method: "POST" })
       throw error;
     }
   });
+
+/** Campaign totals are grouped by campaign alone, not added across sources:
+ *  a visit can appear in more than one source/medium group. */
+export const getUmamiCampaignDashboardReport = createServerFn({
+  method: "POST",
+})
+  .middleware(requireProjectContext)
+  .validator(projectScopedSchema)
+  .handler(async ({ context }) => {
+    try {
+      const report = await UmamiReportingService.getUtmCampaigns({
+        projectId: context.projectId,
+        dimensions: ["utm_campaign"],
+        limit: 5,
+      });
+      return {
+        status: "ok" as const,
+        websiteName: report.source.websiteName,
+        rows: report.rows.map((row) => ({
+          campaign: row.dimensions.utm_campaign ?? "",
+          visits: row.current.visits,
+          previousVisits: row.previous.visits,
+        })),
+        truncated:
+          !report.coverage.current.complete ||
+          !report.coverage.previous.complete,
+      };
+    } catch (error) {
+      if (error instanceof UmamiError) {
+        if (error.code === "umami_not_connected") {
+          return { status: "not_connected" as const };
+        }
+        if (error.code === "umami_rate_limited") {
+          throw new AppError("RATE_LIMITED");
+        }
+        return {
+          status: "error" as const,
+          error: { code: error.code, message: error.message },
+        };
+      }
+      throw error;
+    }
+  });

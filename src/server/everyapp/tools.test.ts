@@ -91,13 +91,14 @@ describe("OpenSEO's tools on the Every App gateway", () => {
     expect(response.status).toBe(200);
     const catalog = await response.json<ToolsListResponseV1>();
     expect(catalog.warnings ?? []).toEqual([]);
-    expect(catalog.tools).toHaveLength(87);
+    expect(catalog.tools).toHaveLength(88);
     expect(catalog.tools.map((tool) => tool.name)).toEqual(
       expect.arrayContaining([
         "get_umami_organic_overview",
         "get_umami_landing_pages",
         "get_umami_page_performance",
         "get_umami_traffic_sources",
+        "get_umami_utm_campaigns",
       ]),
     );
     expect(catalog.instructions?.length).toBeLessThanOrEqual(1024);

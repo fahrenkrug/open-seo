@@ -1,8 +1,10 @@
+import { inclusiveGa4Days } from "@/server/features/ga4/services/Ga4Dates";
+import { sort } from "remeda";
 import {
-  ga4DateInTimeZone,
-  inclusiveGa4Days,
-  shiftGa4Date,
-} from "@/server/features/ga4/services/Ga4Dates";
+  resolveUmamiDateRange,
+  toUmamiTimeRange,
+  fillUmamiTrend,
+} from "./UmamiDates";
 import {
   comparisonValue,
   previousPeriod,
@@ -10,6 +12,10 @@ import {
 import { UmamiService } from "@/server/features/umami/services/UmamiService";
 import type { UmamiStats, UmamiTimeRange } from "@/server/lib/umamiClient";
 import { UmamiError } from "@/server/lib/umamiErrors";
+import {
+  umamiUtmDimensionSchema,
+  type UmamiUtmDimension,
+} from "@/shared/umami";
 
 export type UmamiChannel = "organic_search" | "all";
 type UmamiReportKind =
@@ -17,8 +23,6 @@ type UmamiReportKind =
   | "page_performance"
   | "referrers"
   | "channels";
-
-type DateRange = { startDate: string; endDate: string };
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 1_000;
@@ -65,104 +69,6 @@ const REPORTS = {
   },
 } as const;
 
-function parseDate(value: string): boolean {
-  return (
-    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`))
-  );
-}
-
-/** Same defaults as the GA4 reports: the last 28 complete days in the
- *  connection's time zone, with a future endDate moved back to yesterday. */
-function resolveUmamiDateRange(
-  input: { startDate?: string; endDate?: string },
-  timeZone: string,
-  now: Date = new Date(),
-) {
-  if (Boolean(input.startDate) !== Boolean(input.endDate)) {
-    throw new UmamiError(
-      "validation_error",
-      "Provide both startDate and endDate, or neither.",
-    );
-  }
-  const requestedDateRange =
-    input.startDate && input.endDate
-      ? { startDate: input.startDate, endDate: input.endDate }
-      : null;
-  if (
-    requestedDateRange &&
-    (!parseDate(requestedDateRange.startDate) ||
-      !parseDate(requestedDateRange.endDate) ||
-      requestedDateRange.startDate > requestedDateRange.endDate)
-  ) {
-    throw new UmamiError(
-      "validation_error",
-      "Dates must be valid YYYY-MM-DD values with startDate on or before endDate.",
-    );
-  }
-  const lastCompleteDay = shiftGa4Date(ga4DateInTimeZone(now, timeZone), -1);
-  let endDate = requestedDateRange?.endDate ?? lastCompleteDay;
-  const startDate = requestedDateRange?.startDate ?? shiftGa4Date(endDate, -27);
-  const warnings: string[] = [];
-  if (endDate > lastCompleteDay) {
-    endDate = lastCompleteDay;
-    warnings.push("end_date_clamped");
-  }
-  if (startDate > endDate) {
-    throw new UmamiError(
-      "validation_error",
-      "The resolved startDate is after the last complete day.",
-    );
-  }
-  return {
-    requestedDateRange,
-    resolvedDateRange: { startDate, endDate },
-    warnings,
-  };
-}
-
-// Milliseconds the zone is ahead of UTC at this instant.
-function zoneOffset(instant: number, timeZone: string): number {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone,
-      hourCycle: "h23",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    })
-      .formatToParts(new Date(instant))
-      .map((part) => [part.type, Number(part.value)]),
-  );
-  const asUtc = Date.UTC(
-    parts.year,
-    parts.month - 1,
-    parts.day,
-    parts.hour,
-    parts.minute,
-    parts.second,
-  );
-  return asUtc - Math.floor(instant / 1000) * 1000;
-}
-
-/** Epoch milliseconds of local midnight that starts `date` in `timeZone`. */
-function zonedMidnight(date: string, timeZone: string): number {
-  const utcMidnight = Date.parse(`${date}T00:00:00.000Z`);
-  const guess = utcMidnight - zoneOffset(utcMidnight, timeZone);
-  // A DST change between the guess and midnight shifts the offset once more.
-  return utcMidnight - zoneOffset(guess, timeZone);
-}
-
-function toUmamiTimeRange(range: DateRange, timeZone: string): UmamiTimeRange {
-  return {
-    startAt: zonedMidnight(range.startDate, timeZone),
-    endAt: zonedMidnight(shiftGa4Date(range.endDate, 1), timeZone) - 1,
-  };
-}
-
 const NO_TRAFFIC: UmamiStats = {
   pageviews: 0,
   visitors: 0,
@@ -189,58 +95,6 @@ const OVERVIEW_METRICS = [
   "bounceRate",
   "avgVisitDurationSeconds",
 ] as const;
-
-type Series = { x: string; y: number }[];
-type TrendUnit = "day" | "month";
-
-// Umami labels buckets "YYYY-MM-DDT00:00:00Z" in the requested zone.
-function byPeriod(rows: Series, unit: TrendUnit) {
-  const length = unit === "day" ? 10 : 7;
-  return new Map(rows.map((row) => [row.x.slice(0, length), row.y]));
-}
-
-function periods(range: DateRange, unit: TrendUnit): string[] {
-  if (unit === "day") {
-    const days: string[] = [];
-    for (
-      let date = range.startDate;
-      date <= range.endDate;
-      date = shiftGa4Date(date, 1)
-    ) {
-      days.push(date);
-    }
-    return days;
-  }
-  const months: string[] = [];
-  let [year, month] = range.startDate.split("-").map(Number);
-  const last = range.endDate.slice(0, 7);
-  for (;;) {
-    const key = `${year}-${String(month).padStart(2, "0")}`;
-    if (key > last) break;
-    months.push(key);
-    month = month === 12 ? 1 : month + 1;
-    if (month === 1) year += 1;
-  }
-  return months;
-}
-
-/** Zero-fill the series across the range: Umami omits empty periods. With
- *  the organic filter only entry pageviews match, so pageviews are left out
- *  rather than reported as a visit count. */
-function fillTrend(
-  series: { pageviews: Series; sessions: Series },
-  range: DateRange,
-  unit: TrendUnit,
-  includePageviews: boolean,
-) {
-  const pageviews = byPeriod(series.pageviews, unit);
-  const visitors = byPeriod(series.sessions, unit);
-  return periods(range, unit).map((date) => ({
-    date,
-    visitors: visitors.get(date) ?? 0,
-    pageviews: includePageviews ? (pageviews.get(date) ?? 0) : null,
-  }));
-}
 
 function source(
   connection: {
@@ -281,7 +135,7 @@ async function getOverview(
     previousDateRange,
     connection.timeZone,
   );
-  const unit: TrendUnit =
+  const unit =
     inclusiveGa4Days(resolvedDateRange.startDate, resolvedDateRange.endDate) >
     MAX_DAILY_TREND_DAYS
       ? "month"
@@ -329,7 +183,7 @@ async function getOverview(
         comparisonValue(current[metric], previous[metric]),
       ]),
     ),
-    trend: fillTrend(series, resolvedDateRange, unit, !organic),
+    trend: fillUmamiTrend(series, resolvedDateRange, unit, !organic),
     warnings: dateRange.warnings,
   };
 }
@@ -424,4 +278,135 @@ async function runReport(input: UmamiReportInput) {
 export type UmamiReportResult = Awaited<ReturnType<typeof runReport>>;
 export type UmamiOverviewResult = Awaited<ReturnType<typeof getOverview>>;
 
-export const UmamiReportingService = { getOverview, runReport };
+const UTM_REPORT_LIMIT = 500;
+const utmDimensionsSchema = umamiUtmDimensionSchema
+  .array()
+  .min(1)
+  .max(5)
+  .refine((dimensions) => new Set(dimensions).size === dimensions.length);
+
+export type UmamiUtmCampaignsInput = {
+  projectId: string;
+  dimensions?: UmamiUtmDimension[];
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+};
+
+async function getUtmCampaigns(input: UmamiUtmCampaignsInput) {
+  const parsedDimensions = utmDimensionsSchema.safeParse(
+    input.dimensions ?? ["utm_source", "utm_medium", "utm_campaign"],
+  );
+  if (!parsedDimensions.success) {
+    throw new UmamiError(
+      "validation_error",
+      "Choose one or more distinct UTM dimensions: source, medium, campaign, content, or term.",
+    );
+  }
+  const dimensions = parsedDimensions.data;
+  const limit = input.limit ?? DEFAULT_LIMIT;
+  const offset = input.offset ?? 0;
+  if (!Number.isInteger(limit) || limit < 1 || limit > UTM_REPORT_LIMIT) {
+    throw new UmamiError(
+      "validation_error",
+      `limit must be an integer from 1 to ${UTM_REPORT_LIMIT}.`,
+    );
+  }
+  if (!Number.isInteger(offset) || offset < 0) {
+    throw new UmamiError(
+      "validation_error",
+      "offset must be a non-negative integer.",
+    );
+  }
+
+  const { connection, instance, client } = await UmamiService.openConnection(
+    input.projectId,
+  );
+  const dateRange = resolveUmamiDateRange(input, connection.timeZone);
+  const previousDateRange = previousPeriod(dateRange.resolvedDateRange);
+  const [currentGroups, previousGroups] = await Promise.all(
+    [dateRange.resolvedDateRange, previousDateRange].map((range) =>
+      client.getUtmBreakdown(
+        connection.websiteId,
+        toUmamiTimeRange(range, connection.timeZone),
+        { dimensions, timeZone: connection.timeZone },
+      ),
+    ),
+  );
+  // Umami returns at most 500 groups, ranked by visitors. A missing prior
+  // group is zero only when that response was complete, never when capped.
+  const coverage = {
+    current: {
+      fetchedRows: currentGroups.length,
+      complete: currentGroups.length < UTM_REPORT_LIMIT,
+    },
+    previous: {
+      fetchedRows: previousGroups.length,
+      complete: previousGroups.length < UTM_REPORT_LIMIT,
+    },
+  };
+  const key = (row: (typeof currentGroups)[number]) =>
+    JSON.stringify(dimensions.map((dimension) => row.dimensions[dimension]));
+  const previousByKey = new Map(previousGroups.map((row) => [key(row), row]));
+  const taggedRows = sort(
+    currentGroups.filter((row) =>
+      dimensions.some((dimension) => row.dimensions[dimension]),
+    ),
+    (a, b) => {
+      const visits = b.visits - a.visits;
+      if (visits !== 0) return visits;
+      const aKey = key(a);
+      const bKey = key(b);
+      return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
+    },
+  );
+  const rows = taggedRows.slice(offset, offset + limit).map((row) => {
+    const prior = previousByKey.get(key(row));
+    const current = { visits: row.visits, visitors: row.visitors };
+    const previous = {
+      visits: prior?.visits ?? (coverage.previous.complete ? 0 : null),
+      visitors: prior?.visitors ?? (coverage.previous.complete ? 0 : null),
+    };
+    return {
+      dimensions: row.dimensions,
+      current,
+      previous,
+      comparison: {
+        visits: comparisonValue(current.visits, previous.visits),
+        visitors: comparisonValue(current.visitors, previous.visitors),
+      },
+    };
+  });
+  const warnings = [...dateRange.warnings];
+  if (!coverage.current.complete) warnings.push("utm_current_report_capped");
+  if (!coverage.previous.complete) warnings.push("utm_previous_report_capped");
+
+  return {
+    status: "ok" as const,
+    source: source(connection, instance),
+    request: {
+      requestedDateRange: dateRange.requestedDateRange,
+      resolvedDateRange: dateRange.resolvedDateRange,
+      previousDateRange,
+      timeZone: connection.timeZone,
+      dimensions,
+      metrics: ["visits", "visitors"],
+    },
+    rows,
+    rowCount: rows.length,
+    pageInfo: { limit, offset, hasMore: taggedRows.length > offset + limit },
+    coverage,
+    warnings,
+  };
+}
+
+export type UmamiUtmCampaignsResult = Awaited<
+  ReturnType<typeof getUtmCampaigns>
+>;
+
+export const UmamiReportingService = {
+  getOverview,
+  runReport,
+  getUtmCampaigns,
+};

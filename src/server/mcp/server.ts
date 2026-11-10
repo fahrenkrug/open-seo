@@ -65,6 +65,7 @@ import {
   getUmamiOrganicOverviewTool,
   getUmamiPagePerformanceTool,
   getUmamiTrafficSourcesTool,
+  getUmamiUtmCampaignsTool,
 } from "@/server/mcp/tools/umami-analytics-tools";
 import { createProjectTool } from "@/server/mcp/tools/create-project";
 import {
@@ -336,6 +337,7 @@ export function registerOpenSeoTools(
   register(getUmamiLandingPagesTool);
   register(getUmamiPagePerformanceTool);
   register(getUmamiTrafficSourcesTool);
+  register(getUmamiUtmCampaignsTool);
   register(runSiteAuditTool);
   register(listSiteAuditsTool);
   register(deleteSiteAuditTool);

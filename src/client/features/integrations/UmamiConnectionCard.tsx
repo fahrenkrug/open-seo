@@ -70,6 +70,7 @@ export function UmamiConnectionCard({ projectId }: { projectId: string }) {
     Promise.all([
       queryClient.invalidateQueries({ queryKey }),
       queryClient.invalidateQueries({ queryKey: ["dashboardUmamiReport"] }),
+      queryClient.invalidateQueries({ queryKey: ["dashboardUmamiCampaigns"] }),
       queryClient.invalidateQueries({ queryKey: ["dashboardActivation"] }),
     ]);
 

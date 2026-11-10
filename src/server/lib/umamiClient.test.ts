@@ -146,4 +146,115 @@ describe("umamiClient", () => {
       createUmamiClient(passwordLogin).getStats("w1", range),
     ).rejects.toMatchObject({ code: "umami_unsupported_version" });
   });
+
+  it("requests joint UTM groups and preserves distinct visits and visitors", async () => {
+    mocks.fetch.mockImplementation(async (input) =>
+      requestUrl(input).endsWith("/auth/login")
+        ? Response.json({ token: "jwt-1" })
+        : Response.json([
+            {
+              utmSource: "newsletter",
+              utmMedium: "email",
+              utmCampaign: "Summer",
+              utmContent: "",
+              utmTerm: null,
+              views: 32,
+              visits: 7,
+              visitors: 4,
+            },
+          ]),
+    );
+
+    const result = await createUmamiClient(passwordLogin).getUtmBreakdown(
+      "w1",
+      range,
+      {
+        dimensions: [
+          "utm_source",
+          "utm_medium",
+          "utm_campaign",
+          "utm_content",
+          "utm_term",
+        ],
+        timeZone: "Europe/Amsterdam",
+      },
+    );
+
+    const call = mocks.fetch.mock.calls[1];
+    expect(requestUrl(call[0])).toBe(
+      "https://stats.example.com/api/reports/breakdown",
+    );
+    expect(call[1]?.method).toBe("POST");
+    const body = call[1]?.body;
+    expect(typeof body === "string" ? JSON.parse(body) : null).toEqual({
+      websiteId: "w1",
+      type: "breakdown",
+      parameters: {
+        startDate: "1970-01-01T00:00:01.000Z",
+        endDate: "1970-01-01T00:00:02.000Z",
+        fields: [
+          "utmSource",
+          "utmMedium",
+          "utmCampaign",
+          "utmContent",
+          "utmTerm",
+        ],
+      },
+      filters: { ...range, timezone: "Europe/Amsterdam" },
+    });
+    expect(result).toEqual([
+      {
+        dimensions: {
+          utm_source: "newsletter",
+          utm_medium: "email",
+          utm_campaign: "Summer",
+          utm_content: "",
+          utm_term: null,
+        },
+        visits: 7,
+        visitors: 4,
+      },
+    ]);
+  });
+
+  it.each([400, 404])(
+    "explains the required Umami version when the UTM route returns %s",
+    async (status) => {
+      mocks.fetch.mockResolvedValue(new Response(null, { status }));
+
+      await expect(
+        createUmamiClient({
+          ...passwordLogin,
+          authType: "api_key",
+        }).getUtmBreakdown("w1", range, {
+          dimensions: ["utm_campaign"],
+          timeZone: "UTC",
+        }),
+      ).rejects.toMatchObject({
+        code: "umami_unsupported_version",
+        message:
+          "The server rejected the UTM report. UTM campaign reports require Umami 3.1 or newer; check your server version and API URL.",
+      });
+    },
+  );
+
+  it.each([
+    { utmCampaign: "summer", visitors: 4 },
+    { visits: 7, visitors: 4 },
+  ])(
+    "rejects an incomplete UTM report instead of returning zeros",
+    async (row) => {
+      mocks.fetch.mockResolvedValue(Response.json([row]));
+
+      await expect(
+        createUmamiClient({
+          ...passwordLogin,
+          authType: "api_key",
+        }).getUtmBreakdown("w1", range, {
+          dimensions: ["utm_campaign"],
+          timeZone: "UTC",
+        }),
+      ).rejects.toMatchObject({ code: "umami_malformed_response" });
+    },
+  );
 });

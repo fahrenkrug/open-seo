@@ -7,6 +7,7 @@ import {
   umamiApiRoot,
   type UmamiAuthType,
   type UmamiHeader,
+  type UmamiUtmDimension,
 } from "@/shared/umami";
 
 const REQUEST_TIMEOUT_MS = 15_000;
@@ -72,6 +73,26 @@ const expandedMetricsSchema = z.array(
   }),
 );
 type UmamiExpandedMetric = z.infer<typeof expandedMetricsSchema>[number];
+
+const utmFields = {
+  utm_source: "utmSource",
+  utm_medium: "utmMedium",
+  utm_campaign: "utmCampaign",
+  utm_content: "utmContent",
+  utm_term: "utmTerm",
+} as const;
+
+const utmBreakdownSchema = z.array(
+  z.object({
+    utmSource: z.string().nullable().optional(),
+    utmMedium: z.string().nullable().optional(),
+    utmCampaign: z.string().nullable().optional(),
+    utmContent: z.string().nullable().optional(),
+    utmTerm: z.string().nullable().optional(),
+    visits: z.number().int().nonnegative(),
+    visitors: z.number().int().nonnegative(),
+  }),
+);
 
 function statusError(status: number): UmamiError {
   if (status === 401 || status === 403) {
@@ -339,6 +360,62 @@ export function createUmamiClient(credentials: UmamiCredentials) {
           { auth: true },
         ),
       );
+    },
+
+    /** Umami 3.1+ groups these fields jointly and counts distinct visits and
+     *  visitors per group. This report has a fixed 500-row limit. */
+    async getUtmBreakdown(
+      websiteId: string,
+      range: UmamiTimeRange,
+      input: { dimensions: UmamiUtmDimension[]; timeZone: string },
+    ) {
+      let body: unknown;
+      try {
+        body = await send("/reports/breakdown", {
+          method: "POST",
+          auth: true,
+          body: {
+            websiteId,
+            type: "breakdown",
+            parameters: {
+              startDate: new Date(range.startAt).toISOString(),
+              endDate: new Date(range.endAt).toISOString(),
+              fields: input.dimensions.map((dimension) => utmFields[dimension]),
+            },
+            filters: {
+              ...range,
+              timezone: input.timeZone,
+            },
+          },
+        });
+      } catch (error) {
+        if (
+          error instanceof UmamiError &&
+          (error.status === 400 || error.status === 404)
+        ) {
+          throw new UmamiError(
+            "umami_unsupported_version",
+            "The server rejected the UTM report. UTM campaign reports require Umami 3.1 or newer; check your server version and API URL.",
+            error.status,
+          );
+        }
+        throw error;
+      }
+      return parse(utmBreakdownSchema, body).map((row) => {
+        const dimensions: Partial<Record<UmamiUtmDimension, string | null>> =
+          {};
+        for (const dimension of input.dimensions) {
+          const value = row[utmFields[dimension]];
+          if (value === undefined) {
+            throw new UmamiError(
+              "umami_malformed_response",
+              "Umami's UTM report is missing a requested dimension.",
+            );
+          }
+          dimensions[dimension] = value;
+        }
+        return { dimensions, visits: row.visits, visitors: row.visitors };
+      });
     },
   };
 }

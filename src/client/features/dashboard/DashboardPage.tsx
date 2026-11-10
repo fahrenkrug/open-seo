@@ -26,6 +26,7 @@ import {
 } from "@/client/features/dashboard/DashboardCards";
 import { Ga4Card } from "@/client/features/dashboard/Ga4Card";
 import { UmamiCard } from "@/client/features/dashboard/UmamiCard";
+import { UmamiCampaignsCard } from "@/client/features/dashboard/UmamiCampaignsCard";
 import { WorkspaceMergeBanner } from "@/client/features/dashboard/WorkspaceMergeBanner";
 import { QueryError } from "@/client/components/QueryState";
 import {
@@ -199,7 +200,12 @@ export function DashboardPage({
               connected={gscConnected}
               siteUrl={activation.gsc.siteUrl}
             />
-            {umamiConnected ? <UmamiCard projectId={projectId} /> : null}
+            {umamiConnected ? (
+              <>
+                <UmamiCard projectId={projectId} />
+                <UmamiCampaignsCard projectId={projectId} />
+              </>
+            ) : null}
             {ga4Connected ||
             (!umamiConnected && !activation.ga4.cardDismissedAt) ? (
               <Ga4Card projectId={projectId} connected={ga4Connected} />

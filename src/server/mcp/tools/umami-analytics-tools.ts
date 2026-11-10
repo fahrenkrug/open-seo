@@ -5,7 +5,9 @@ import {
   type UmamiOverviewResult,
   type UmamiReportInput,
   type UmamiReportResult,
+  type UmamiUtmCampaignsResult,
 } from "@/server/features/umami/services/UmamiReportingService";
+import { umamiUtmDimensionSchema } from "@/shared/umami";
 import { UmamiError } from "@/server/lib/umamiErrors";
 import { buildProjectMeta } from "@/server/mcp/context";
 import { mcpResponse } from "@/server/mcp/formatters";
@@ -295,4 +297,129 @@ export const getUmamiTrafficSourcesTool = {
       kind: args.breakdown === "channel" ? "channels" : "referrers",
     }),
   ),
+};
+
+const utmCampaignsInputSchema = z.strictObject({
+  projectId: projectIdSchema,
+  startDate: dateSchema.optional(),
+  endDate: dateSchema.optional(),
+  dimensions: z
+    .array(umamiUtmDimensionSchema)
+    .min(1)
+    .max(5)
+    .refine((values) => new Set(values).size === values.length, {
+      message: "Choose each UTM dimension only once.",
+    })
+    .default(["utm_source", "utm_medium", "utm_campaign"])
+    .describe(
+      "Group by these UTM parameters together. Defaults to source, medium, and campaign; add utm_content or utm_term for detail, or use only utm_campaign for campaign totals. Distinct visits and visitors must not be summed across groups.",
+    ),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(100)
+    .describe(
+      "Rows to return, sorted by current visits. Umami returns at most 500 groups per period; check coverage and warnings before treating the result as complete.",
+    ),
+  offset: z
+    .number()
+    .int()
+    .min(0)
+    .default(0)
+    .describe(
+      "Rows to skip within the groups Umami returned. Cannot retrieve groups beyond Umami's 500-row limit.",
+    ),
+});
+type UtmCampaignsArgs = z.infer<typeof utmCampaignsInputSchema>;
+
+const campaignCountsSchema = z.looseObject({
+  visits: z.number(),
+  visitors: z.number(),
+});
+const previousCampaignCountsSchema = z.looseObject({
+  visits: z.number().nullable(),
+  visitors: z.number().nullable(),
+});
+const campaignChangeSchema = z.looseObject({
+  current: z.number().nullable(),
+  previous: z.number().nullable(),
+  absoluteChange: z.number().nullable(),
+  percentChange: z.number().nullable(),
+});
+const utmCampaignsOutputSchema = analyticsEnvelopeSchema({
+  source: looseObjectOutputSchema,
+  request: looseObjectOutputSchema,
+  rowCount: z.number(),
+  rows: z.array(
+    z.looseObject({
+      dimensions: z.record(z.string(), z.string().nullable()),
+      current: campaignCountsSchema,
+      previous: previousCampaignCountsSchema,
+      comparison: z.looseObject({
+        visits: campaignChangeSchema,
+        visitors: campaignChangeSchema,
+      }),
+    }),
+  ),
+  pageInfo: looseObjectOutputSchema,
+  coverage: looseObjectOutputSchema,
+  warnings: z.array(z.string()),
+});
+
+function utmCampaignsText(result: UmamiUtmCampaignsResult) {
+  const range = result.request.resolvedDateRange;
+  const previous = result.request.previousDateRange;
+  const limited =
+    !result.coverage.current.complete || !result.coverage.previous.complete
+      ? " Umami returned its 500-group limit for at least one period; rankings may be incomplete. Missing previous values are unknown when the previous period is capped."
+      : "";
+  const paginate = result.pageInfo.hasMore
+    ? " More returned groups are available; use offset for the next page."
+    : "";
+  const summary = `UTM campaigns (Umami: ${result.source.websiteName}): ${result.rowCount} groups for ${range.startDate} through ${range.endDate}, compared with ${previous.startDate} through ${previous.endDate}. Includes tagged traffic from all channels; visits and visitors are distinct within each group.${rangeNote(result)}${limited}${paginate}`;
+  if (result.rows.length === 0) return summary;
+  return `${summary}\n${formatMcpTable(result.rows, [
+    ...result.request.dimensions.map((dimension) => ({
+      header: dimension,
+      value: (row: UmamiUtmCampaignsResult["rows"][number]) => {
+        const value = row.dimensions[dimension];
+        return value == null ? "(not set)" : value === "" ? "(empty)" : value;
+      },
+    })),
+    { header: "visits", value: (row) => row.current.visits },
+    { header: "visitors", value: (row) => row.current.visitors },
+    { header: "previous visits", value: (row) => row.previous.visits },
+    {
+      header: "visits change",
+      value: (row) =>
+        row.comparison.visits.percentChange === null
+          ? null
+          : percentCell(row.comparison.visits.percentChange),
+    },
+  ])}`;
+}
+
+export const getUmamiUtmCampaignsTool = {
+  name: "get_umami_utm_campaigns",
+  config: {
+    title: "Get Umami UTM campaigns",
+    description: `Compare tagged campaign traffic by UTM source, medium, and campaign together, with optional content or term. Returns distinct visits and visitors plus the equal-length previous period, across all channels. Defaults to the last 28 complete days. Requires Umami 3.1+. Umami caps each period at 500 groups; coverage and warnings indicate potentially incomplete rankings. Missing previous values are null when previous-period coverage is incomplete. ${SCOPE_NOTE}`,
+    inputSchema: utmCampaignsInputSchema,
+    outputSchema: utmCampaignsOutputSchema,
+    annotations,
+  },
+  handler: withMcpProjectAuth(async (args: UtmCampaignsArgs, context) => {
+    try {
+      const result = await UmamiReportingService.getUtmCampaigns(args);
+      return mcpResponse({
+        text: utmCampaignsText(result),
+        meta: buildProjectMeta(context, args.projectId),
+        structuredContent: result,
+      });
+    } catch (error) {
+      return errorResponse(args, context, error);
+    }
+  }),
 };

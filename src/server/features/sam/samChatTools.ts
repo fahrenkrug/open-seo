@@ -60,6 +60,7 @@ import {
   getUmamiOrganicOverviewTool,
   getUmamiPagePerformanceTool,
   getUmamiTrafficSourcesTool,
+  getUmamiUtmCampaignsTool,
 } from "@/server/mcp/tools/umami-analytics-tools";
 import {
   findSerpCompetitorsTool,
@@ -470,6 +471,7 @@ export function buildSamMcpTools(
     get_umami_landing_pages: adaptObjectTool(getUmamiLandingPagesTool),
     get_umami_page_performance: adaptObjectTool(getUmamiPagePerformanceTool),
     get_umami_traffic_sources: adaptObjectTool(getUmamiTrafficSourcesTool),
+    get_umami_utm_campaigns: adaptObjectTool(getUmamiUtmCampaignsTool),
     run_site_audit: adaptTool(runSiteAuditTool),
     get_audit_status: waitingAuditStatusTool(adaptTool),
     get_audit_issues: adaptTool(getAuditIssuesTool),

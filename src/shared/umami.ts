@@ -8,6 +8,15 @@ const UMAMI_CLOUD_API_URL = "https://api.umami.is/v1";
 export const umamiAuthTypeSchema = z.enum(["api_key", "password"]);
 export type UmamiAuthType = z.infer<typeof umamiAuthTypeSchema>;
 
+export const umamiUtmDimensionSchema = z.enum([
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+]);
+export type UmamiUtmDimension = z.infer<typeof umamiUtmDimensionSchema>;
+
 // OpenSEO sets these itself; letting a custom header override them would break
 // authentication or the request framing.
 const RESERVED_HEADER_NAMES = new Set([
