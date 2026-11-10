@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const UMAMI_SETUP_DOCS_URL =
-  "https://github.com/every-app/open-seo/blob/main/docs/UMAMI_ANALYTICS.md";
+  "https://github.com/fahrenkrug/open-seo/blob/umami/docs/UMAMI_ANALYTICS.md";
 
 const UMAMI_CLOUD_API_URL = "https://api.umami.is/v1";
 

@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppForm } from "@/client/components/form/useAppForm";
 import { Button } from "@/client/components/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
   authRedirectSearchSchema,
   useAuthPageState,
 } from "@/client/features/auth/AuthPage";
+import { signUpStatusQueryOptions } from "@/client/features/auth/signUpStatus";
 import { useGoogleAuth } from "@/client/features/auth/useGoogleAuth";
 import { getFormError } from "@/client/lib/forms";
 import { captureClientEvent } from "@/client/lib/posthog";
@@ -21,6 +23,7 @@ import {
   toAuthCallbackURL,
 } from "@/lib/auth-redirect";
 import { z } from "zod";
+import { pageHead } from "@/client/lib/pageHead";
 
 const signInSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
@@ -28,6 +31,7 @@ const signInSchema = z.object({
 });
 
 export const Route = createFileRoute("/_auth/sign-in")({
+  head: () => pageHead("Sign in"),
   validateSearch: authRedirectSearchSchema,
   component: SignInPage,
 });
@@ -35,11 +39,29 @@ export const Route = createFileRoute("/_auth/sign-in")({
 function SignInPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
-  const { redirectTo, oauthQuery, isHostedMode } = useAuthPageState(
-    search.redirect,
-  );
+  const { redirectTo, oauthQuery, isHostedMode, isBetterAuthMode } =
+    useAuthPageState(search.redirect);
   const [showEmailForm, setShowEmailForm] = useState(false);
+  // The standalone Docker edition has accounts but no Google sign-in and no
+  // emailed password reset: go straight to the email form. Accounts come from
+  // invitations, and a fresh installation has nobody to sign in, so its first
+  // visitor is sent to create the admin account instead.
+  const emailOnly = isBetterAuthMode && !isHostedMode;
+  const emailFormVisible = showEmailForm || emailOnly;
   const google = useGoogleAuth({ redirectTo });
+  const signUpStatus = useQuery({
+    ...signUpStatusQueryOptions(),
+    enabled: emailOnly,
+  });
+  const firstAccount = signUpStatus.data?.firstAccount === true;
+  useEffect(() => {
+    if (!firstAccount) return;
+    void navigate({
+      to: "/sign-up",
+      search: getSignInSearch(redirectTo),
+      replace: true,
+    });
+  }, [firstAccount, navigate, redirectTo]);
 
   const form = useAppForm({
     defaultValues: {
@@ -105,7 +127,12 @@ function SignInPage() {
     <AuthPageCard
       title="Sign in"
       footer={
-        isHostedMode ? (
+        emailOnly ? (
+          <p className="text-sm text-foreground/50">
+            Need an account? Ask an administrator for an invitation. Forgot your
+            password? Ask your server administrator to reset it.
+          </p>
+        ) : isHostedMode ? (
           <div
             className={
               showEmailForm
@@ -133,7 +160,7 @@ function SignInPage() {
         ) : null
       }
     >
-      {!showEmailForm ? (
+      {!emailFormVisible ? (
         <>
           <AuthMethodChooser
             googleLabel="Continue with Google"

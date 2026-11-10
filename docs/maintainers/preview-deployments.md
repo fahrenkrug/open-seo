@@ -28,7 +28,7 @@ Alchemy-managed Cloudflare Access boundary.
 Alchemy manages Cloudflare credentials itself — nothing credential-shaped goes
 in the env files.
 
-- **Locally**, run `pnpm alchemy login` once. Answer yes to
+- **Locally**, run `pnpm alchemy login deploy/alchemy/alchemy.run.ts` once. Answer yes to
   **Customize OAuth scopes?** and enable `access:write` on top of the defaults
   (the preview Access gate needs it; add `query_cache:write` too if you will
   deploy production — Hyperdrive). The credential is stored globally, and
@@ -42,10 +42,11 @@ in the env files.
   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` from the environment
   (repo secrets), and resolve the state-store token from the Secrets Store on
   every run. The token needs write access to Workers Scripts, KV, D1, R2, and
-  Workflows, plus **Secrets Store read** and **Account Settings read** (both
+  Workflows, plus **Secrets Store Edit** and **Account Settings read** (both
   used by alchemy's state-store login, which fetches its token through a
-  temporary edge-preview worker). CI never touches Access — the gate is
-  one-time local setup.
+  temporary edge-preview worker; Cloudflare requires Edit to bind a secret,
+  and Read fails with "Secrets store binding authorization failed"). CI never
+  touches Access — the gate is one-time local setup.
 
 ## Cloudflare Access configuration
 
@@ -62,7 +63,8 @@ Zero Trust team domain. Set that full value in `.env.preview` as
 `https://open-seo-<stage>.<WORKERS_SUBDOMAIN>` — hosted previews use that as
 `BETTER_AUTH_URL`, and CI's verify step probes it; a wrong value fails the
 check. Previews in `local_noauth` or `cloudflare_access` mode deploy without
-it, since nothing reads `BETTER_AUTH_URL` there.
+it, since nothing reads `BETTER_AUTH_URL` there; `password` stages read the
+subdomain from the account when it is unset.
 
 Set `ACCESS_ALLOWED_EMAILS` to the exact comma-separated emails that may open
 previews:
@@ -79,7 +81,7 @@ requested application stage and cannot touch the Access stack.
 ## Local preview
 
 ```sh
-pnpm alchemy login    # once — see Credentials above
+pnpm alchemy login deploy/alchemy/alchemy.run.ts  # once — see Credentials above
 cp deploy/.env.preview.example .env.preview
 pnpm preview:access   # once — the shared Access gate (safe to re-run)
 pnpm deploy:preview --stage manual-preview --yes
@@ -133,7 +135,7 @@ cp .env.preview ../open-seo-pub-<pr>/
 (cd ../open-seo-pub-<pr> && pnpm install --frozen-lockfile && pnpm exec vite build --mode preview)
 rm -rf dist && cp -R ../open-seo-pub-<pr>/dist dist
 git worktree remove --force ../open-seo-pub-<pr>
-pnpm alchemy deploy --env-file .env.preview --stage pub-<pr> --yes
+pnpm alchemy deploy deploy/alchemy/alchemy.run.ts --env-file .env.preview --stage pub-<pr> --yes
 ```
 
 Verify the preview redirects to the Access login before sharing its URL.

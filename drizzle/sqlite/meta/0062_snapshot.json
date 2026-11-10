@@ -1,8 +1,8 @@
 {
+  "id": "633a88f7-a404-403e-9507-e5c69314be6c",
+  "prevId": "7e47683d-84bc-4146-851a-8f4a7e410b90",
   "version": "6",
   "dialect": "sqlite",
-  "id": "6633c501-a691-4cb0-95bf-3ab33df97a17",
-  "prevId": "7e47683d-84bc-4146-851a-8f4a7e410b90",
   "tables": {
     "backlink_snapshots": {
       "name": "backlink_snapshots",
@@ -107,15 +107,15 @@
         "backlink_snapshots_project_id_projects_id_fk": {
           "name": "backlink_snapshots_project_id_projects_id_fk",
           "tableFrom": "backlink_snapshots",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -204,15 +204,15 @@
         "crawler_credentials_project_id_projects_id_fk": {
           "name": "crawler_credentials_project_id_projects_id_fk",
           "tableFrom": "crawler_credentials",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -257,28 +257,28 @@
         "dashboard_step_dismissals_user_id_user_id_fk": {
           "name": "dashboard_step_dismissals_user_id_user_id_fk",
           "tableFrom": "dashboard_step_dismissals",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "dashboard_step_dismissals_project_id_projects_id_fk": {
           "name": "dashboard_step_dismissals_project_id_projects_id_fk",
           "tableFrom": "dashboard_step_dismissals",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -331,15 +331,15 @@
         "data_refresh_claims_organization_id_organization_id_fk": {
           "name": "data_refresh_claims_organization_id_organization_id_fk",
           "tableFrom": "data_refresh_claims",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -463,15 +463,15 @@
         "keyword_metrics_project_id_projects_id_fk": {
           "name": "keyword_metrics_project_id_projects_id_fk",
           "tableFrom": "keyword_metrics",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -516,15 +516,15 @@
         "organization_activation_state_organization_id_organization_id_fk": {
           "name": "organization_activation_state_organization_id_organization_id_fk",
           "tableFrom": "organization_activation_state",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -583,15 +583,15 @@
         "project_activation_state_project_id_projects_id_fk": {
           "name": "project_activation_state_project_id_projects_id_fk",
           "tableFrom": "project_activation_state",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -681,8 +681,8 @@
           "columns": [
             "organization_id"
           ],
-          "isUnique": true,
-          "where": "\"projects\".\"name\" = 'Default' AND \"projects\".\"domain\" IS NULL AND \"projects\".\"archived_at\" IS NULL"
+          "where": "\"projects\".\"name\" = 'Default' AND \"projects\".\"domain\" IS NULL AND \"projects\".\"archived_at\" IS NULL",
+          "isUnique": true
         },
         "projects_organization_id_idx": {
           "name": "projects_organization_id_idx",
@@ -696,15 +696,15 @@
         "projects_organization_id_organization_id_fk": {
           "name": "projects_organization_id_organization_id_fk",
           "tableFrom": "projects",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -812,36 +812,36 @@
           "columns": [
             "config_id"
           ],
-          "isUnique": true,
-          "where": "\"rank_check_runs\".\"status\" IN ('pending', 'running')"
+          "where": "\"rank_check_runs\".\"status\" IN ('pending', 'running')",
+          "isUnique": true
         }
       },
       "foreignKeys": {
         "rank_check_runs_config_id_rank_tracking_configs_id_fk": {
           "name": "rank_check_runs_config_id_rank_tracking_configs_id_fk",
           "tableFrom": "rank_check_runs",
-          "tableTo": "rank_tracking_configs",
           "columnsFrom": [
             "config_id"
           ],
+          "tableTo": "rank_tracking_configs",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "rank_check_runs_project_id_projects_id_fk": {
           "name": "rank_check_runs_project_id_projects_id_fk",
           "tableFrom": "rank_check_runs",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -940,15 +940,15 @@
         "rank_snapshots_run_id_rank_check_runs_id_fk": {
           "name": "rank_snapshots_run_id_rank_check_runs_id_fk",
           "tableFrom": "rank_snapshots",
-          "tableTo": "rank_check_runs",
           "columnsFrom": [
             "run_id"
           ],
+          "tableTo": "rank_check_runs",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1081,8 +1081,8 @@
             "location_code",
             "language_code"
           ],
-          "isUnique": true,
-          "where": "\"rank_tracking_configs\".\"location_name\" IS NULL"
+          "where": "\"rank_tracking_configs\".\"location_name\" IS NULL",
+          "isUnique": true
         },
         "rank_tracking_configs_local_idx": {
           "name": "rank_tracking_configs_local_idx",
@@ -1093,23 +1093,23 @@
             "language_code",
             "location_name"
           ],
-          "isUnique": true,
-          "where": "\"rank_tracking_configs\".\"location_name\" IS NOT NULL"
+          "where": "\"rank_tracking_configs\".\"location_name\" IS NOT NULL",
+          "isUnique": true
         }
       },
       "foreignKeys": {
         "rank_tracking_configs_project_id_projects_id_fk": {
           "name": "rank_tracking_configs_project_id_projects_id_fk",
           "tableFrom": "rank_tracking_configs",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1206,15 +1206,15 @@
         "rank_tracking_keywords_config_id_rank_tracking_configs_id_fk": {
           "name": "rank_tracking_keywords_config_id_rank_tracking_configs_id_fk",
           "tableFrom": "rank_tracking_keywords",
-          "tableTo": "rank_tracking_configs",
           "columnsFrom": [
             "config_id"
           ],
+          "tableTo": "rank_tracking_configs",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1268,28 +1268,28 @@
         "saved_keyword_tag_assignments_saved_keyword_id_saved_keywords_id_fk": {
           "name": "saved_keyword_tag_assignments_saved_keyword_id_saved_keywords_id_fk",
           "tableFrom": "saved_keyword_tag_assignments",
-          "tableTo": "saved_keywords",
           "columnsFrom": [
             "saved_keyword_id"
           ],
+          "tableTo": "saved_keywords",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "saved_keyword_tag_assignments_tag_id_saved_keyword_tags_id_fk": {
           "name": "saved_keyword_tag_assignments_tag_id_saved_keyword_tags_id_fk",
           "tableFrom": "saved_keyword_tag_assignments",
-          "tableTo": "saved_keyword_tags",
           "columnsFrom": [
             "tag_id"
           ],
+          "tableTo": "saved_keyword_tags",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1365,15 +1365,15 @@
         "saved_keyword_tags_project_id_projects_id_fk": {
           "name": "saved_keyword_tags_project_id_projects_id_fk",
           "tableFrom": "saved_keyword_tags",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1453,15 +1453,15 @@
         "saved_keywords_project_id_projects_id_fk": {
           "name": "saved_keywords_project_id_projects_id_fk",
           "tableFrom": "saved_keywords",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1565,28 +1565,28 @@
         "user_onboarding_answers_user_id_user_id_fk": {
           "name": "user_onboarding_answers_user_id_user_id_fk",
           "tableFrom": "user_onboarding_answers",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "user_onboarding_answers_organization_id_organization_id_fk": {
           "name": "user_onboarding_answers_organization_id_organization_id_fk",
           "tableFrom": "user_onboarding_answers",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1630,15 +1630,15 @@
         "user_signup_campaigns_user_id_user_id_fk": {
           "name": "user_signup_campaigns_user_id_user_id_fk",
           "tableFrom": "user_signup_campaigns",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1713,15 +1713,15 @@
         "project_competitors_project_id_projects_id_fk": {
           "name": "project_competitors_project_id_projects_id_fk",
           "tableFrom": "project_competitors",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1780,15 +1780,15 @@
         "project_context_sections_project_id_projects_id_fk": {
           "name": "project_context_sections_project_id_projects_id_fk",
           "tableFrom": "project_context_sections",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1878,15 +1878,15 @@
         "project_key_pages_project_id_projects_id_fk": {
           "name": "project_key_pages_project_id_projects_id_fk",
           "tableFrom": "project_key_pages",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1954,15 +1954,15 @@
         "project_research_log_project_id_projects_id_fk": {
           "name": "project_research_log_project_id_projects_id_fk",
           "tableFrom": "project_research_log",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2096,15 +2096,15 @@
         "reports_project_id_projects_id_fk": {
           "name": "reports_project_id_projects_id_fk",
           "tableFrom": "reports",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2194,15 +2194,15 @@
         "report_templates_project_id_projects_id_fk": {
           "name": "report_templates_project_id_projects_id_fk",
           "tableFrom": "report_templates",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2284,28 +2284,28 @@
         "audit_issues_audit_id_audits_id_fk": {
           "name": "audit_issues_audit_id_audits_id_fk",
           "tableFrom": "audit_issues",
-          "tableTo": "audits",
           "columnsFrom": [
             "audit_id"
           ],
+          "tableTo": "audits",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "audit_issues_page_id_audit_pages_id_fk": {
           "name": "audit_issues_page_id_audit_pages_id_fk",
           "tableFrom": "audit_issues",
-          "tableTo": "audit_pages",
           "columnsFrom": [
             "page_id"
           ],
+          "tableTo": "audit_pages",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2441,28 +2441,28 @@
         "audit_lighthouse_results_audit_id_audits_id_fk": {
           "name": "audit_lighthouse_results_audit_id_audits_id_fk",
           "tableFrom": "audit_lighthouse_results",
-          "tableTo": "audits",
           "columnsFrom": [
             "audit_id"
           ],
+          "tableTo": "audits",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "audit_lighthouse_results_page_id_audit_pages_id_fk": {
           "name": "audit_lighthouse_results_page_id_audit_pages_id_fk",
           "tableFrom": "audit_lighthouse_results",
-          "tableTo": "audit_pages",
           "columnsFrom": [
             "page_id"
           ],
+          "tableTo": "audit_pages",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2726,15 +2726,15 @@
         "audit_pages_audit_id_audits_id_fk": {
           "name": "audit_pages_audit_id_audits_id_fk",
           "tableFrom": "audit_pages",
-          "tableTo": "audits",
           "columnsFrom": [
             "audit_id"
           ],
+          "tableTo": "audits",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2900,15 +2900,15 @@
         "audits_project_id_projects_id_fk": {
           "name": "audits_project_id_projects_id_fk",
           "tableFrom": "audits",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2985,28 +2985,28 @@
         "sam_sessions_project_id_projects_id_fk": {
           "name": "sam_sessions_project_id_projects_id_fk",
           "tableFrom": "sam_sessions",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "sam_sessions_user_id_user_id_fk": {
           "name": "sam_sessions_user_id_user_id_fk",
           "tableFrom": "sam_sessions",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3132,23 +3132,23 @@
             "provider_id",
             "account_id"
           ],
-          "isUnique": true,
-          "where": "\"account\".\"provider_id\" in ('google-search-console', 'google-analytics')"
+          "where": "\"account\".\"provider_id\" in ('google-search-console', 'google-analytics')",
+          "isUnique": true
         }
       },
       "foreignKeys": {
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3429,28 +3429,28 @@
         "invitation_organization_id_organization_id_fk": {
           "name": "invitation_organization_id_organization_id_fk",
           "tableFrom": "invitation",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "invitation_inviter_id_user_id_fk": {
           "name": "invitation_inviter_id_user_id_fk",
           "tableFrom": "invitation",
-          "tableTo": "user",
           "columnsFrom": [
             "inviter_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3525,28 +3525,28 @@
         "member_organization_id_organization_id_fk": {
           "name": "member_organization_id_organization_id_fk",
           "tableFrom": "member",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "member_user_id_user_id_fk": {
           "name": "member_user_id_user_id_fk",
           "tableFrom": "member",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3708,15 +3708,15 @@
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3972,15 +3972,15 @@
         "billing_customer_status_organization_id_organization_id_fk": {
           "name": "billing_customer_status_organization_id_organization_id_fk",
           "tableFrom": "billing_customer_status",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4105,28 +4105,28 @@
         "ga4_connections_project_id_projects_id_fk": {
           "name": "ga4_connections_project_id_projects_id_fk",
           "tableFrom": "ga4_connections",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "ga4_connections_organization_id_organization_id_fk": {
           "name": "ga4_connections_organization_id_organization_id_fk",
           "tableFrom": "ga4_connections",
-          "tableTo": "organization",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4222,283 +4222,28 @@
         "gsc_connections_project_id_projects_id_fk": {
           "name": "gsc_connections_project_id_projects_id_fk",
           "tableFrom": "gsc_connections",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "gsc_connections_organization_id_organization_id_fk": {
           "name": "gsc_connections_organization_id_organization_id_fk",
           "tableFrom": "gsc_connections",
+          "columnsFrom": [
+            "organization_id"
+          ],
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "umami_connections": {
-      "name": "umami_connections",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "organization_id": {
-          "name": "organization_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "instance_id": {
-          "name": "instance_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "website_id": {
-          "name": "website_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "website_name": {
-          "name": "website_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "website_domain": {
-          "name": "website_domain",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "time_zone": {
-          "name": "time_zone",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "connected_by_user_id": {
-          "name": "connected_by_user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(current_timestamp)"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(current_timestamp)"
-        }
-      },
-      "indexes": {
-        "umami_connections_project_idx": {
-          "name": "umami_connections_project_idx",
-          "columns": [
-            "project_id"
-          ],
-          "isUnique": true
-        },
-        "umami_connections_organization_idx": {
-          "name": "umami_connections_organization_idx",
-          "columns": [
-            "organization_id"
-          ],
-          "isUnique": false
-        },
-        "umami_connections_instance_idx": {
-          "name": "umami_connections_instance_idx",
-          "columns": [
-            "instance_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "umami_connections_project_id_projects_id_fk": {
-          "name": "umami_connections_project_id_projects_id_fk",
-          "tableFrom": "umami_connections",
-          "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "umami_connections_organization_id_organization_id_fk": {
-          "name": "umami_connections_organization_id_organization_id_fk",
-          "tableFrom": "umami_connections",
-          "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "umami_connections_instance_id_umami_instances_id_fk": {
-          "name": "umami_connections_instance_id_umami_instances_id_fk",
-          "tableFrom": "umami_connections",
-          "tableTo": "umami_instances",
-          "columnsFrom": [
-            "instance_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "umami_instances": {
-      "name": "umami_instances",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "organization_id": {
-          "name": "organization_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "base_url": {
-          "name": "base_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "auth_type": {
-          "name": "auth_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "username": {
-          "name": "username",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "encrypted_secret": {
-          "name": "encrypted_secret",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "encrypted_headers": {
-          "name": "encrypted_headers",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "saved_by_user_id": {
-          "name": "saved_by_user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(current_timestamp)"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(current_timestamp)"
-        }
-      },
-      "indexes": {
-        "umami_instances_organization_idx": {
-          "name": "umami_instances_organization_idx",
-          "columns": [
-            "organization_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "umami_instances_organization_id_organization_id_fk": {
-          "name": "umami_instances_organization_id_organization_id_fk",
-          "tableFrom": "umami_instances",
-          "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4633,15 +4378,15 @@
         "ai_matches_observation_id_ai_observations_id_fk": {
           "name": "ai_matches_observation_id_ai_observations_id_fk",
           "tableFrom": "ai_matches",
-          "tableTo": "ai_observations",
           "columnsFrom": [
             "observation_id"
           ],
+          "tableTo": "ai_observations",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4738,28 +4483,28 @@
         "ai_observations_run_id_ai_runs_id_fk": {
           "name": "ai_observations_run_id_ai_runs_id_fk",
           "tableFrom": "ai_observations",
-          "tableTo": "ai_runs",
           "columnsFrom": [
             "run_id"
           ],
+          "tableTo": "ai_runs",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "ai_observations_prompt_id_ai_prompts_id_fk": {
           "name": "ai_observations_prompt_id_ai_prompts_id_fk",
           "tableFrom": "ai_observations",
-          "tableTo": "ai_prompts",
           "columnsFrom": [
             "prompt_id"
           ],
+          "tableTo": "ai_prompts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4834,15 +4579,15 @@
         "ai_prompts_tracker_id_ai_trackers_id_fk": {
           "name": "ai_prompts_tracker_id_ai_trackers_id_fk",
           "tableFrom": "ai_prompts",
-          "tableTo": "ai_trackers",
           "columnsFrom": [
             "tracker_id"
           ],
+          "tableTo": "ai_trackers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -4931,36 +4676,36 @@
           "columns": [
             "tracker_id"
           ],
-          "isUnique": true,
-          "where": "\"ai_runs\".\"status\" IN ('queued', 'running')"
+          "where": "\"ai_runs\".\"status\" IN ('queued', 'running')",
+          "isUnique": true
         }
       },
       "foreignKeys": {
         "ai_runs_tracker_id_ai_trackers_id_fk": {
           "name": "ai_runs_tracker_id_ai_trackers_id_fk",
           "tableFrom": "ai_runs",
-          "tableTo": "ai_trackers",
           "columnsFrom": [
             "tracker_id"
           ],
+          "tableTo": "ai_trackers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "ai_runs_project_id_projects_id_fk": {
           "name": "ai_runs_project_id_projects_id_fk",
           "tableFrom": "ai_runs",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5026,15 +4771,15 @@
         "ai_sources_observation_id_ai_observations_id_fk": {
           "name": "ai_sources_observation_id_ai_observations_id_fk",
           "tableFrom": "ai_sources",
-          "tableTo": "ai_observations",
           "columnsFrom": [
             "observation_id"
           ],
+          "tableTo": "ai_observations",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5173,15 +4918,15 @@
         "ai_trackers_project_id_projects_id_fk": {
           "name": "ai_trackers_project_id_projects_id_fk",
           "tableFrom": "ai_trackers",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5269,15 +5014,15 @@
         "local_rank_businesses_scan_id_local_rank_scans_id_fk": {
           "name": "local_rank_businesses_scan_id_local_rank_scans_id_fk",
           "tableFrom": "local_rank_businesses",
-          "tableTo": "local_rank_scans",
           "columnsFrom": [
             "scan_id"
           ],
+          "tableTo": "local_rank_scans",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5351,36 +5096,36 @@
           "columns": [
             "tracker_id"
           ],
-          "isUnique": true,
-          "where": "\"local_rank_checks\".\"status\" IN ('queued', 'running')"
+          "where": "\"local_rank_checks\".\"status\" IN ('queued', 'running')",
+          "isUnique": true
         }
       },
       "foreignKeys": {
         "local_rank_checks_project_id_projects_id_fk": {
           "name": "local_rank_checks_project_id_projects_id_fk",
           "tableFrom": "local_rank_checks",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "local_rank_checks_tracker_id_local_rank_trackers_id_fk": {
           "name": "local_rank_checks_tracker_id_local_rank_trackers_id_fk",
           "tableFrom": "local_rank_checks",
-          "tableTo": "local_rank_trackers",
           "columnsFrom": [
             "tracker_id"
           ],
+          "tableTo": "local_rank_trackers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5433,15 +5178,15 @@
         "local_rank_keywords_tracker_id_local_rank_trackers_id_fk": {
           "name": "local_rank_keywords_tracker_id_local_rank_trackers_id_fk",
           "tableFrom": "local_rank_keywords",
-          "tableTo": "local_rank_trackers",
           "columnsFrom": [
             "tracker_id"
           ],
+          "tableTo": "local_rank_trackers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5544,15 +5289,15 @@
         "local_rank_points_scan_id_local_rank_scans_id_fk": {
           "name": "local_rank_points_scan_id_local_rank_scans_id_fk",
           "tableFrom": "local_rank_points",
-          "tableTo": "local_rank_scans",
           "columnsFrom": [
             "scan_id"
           ],
+          "tableTo": "local_rank_scans",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5612,28 +5357,28 @@
         "local_rank_results_point_id_local_rank_points_id_fk": {
           "name": "local_rank_results_point_id_local_rank_points_id_fk",
           "tableFrom": "local_rank_results",
-          "tableTo": "local_rank_points",
           "columnsFrom": [
             "point_id"
           ],
+          "tableTo": "local_rank_points",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "local_rank_results_business_id_local_rank_businesses_id_fk": {
           "name": "local_rank_results_business_id_local_rank_businesses_id_fk",
           "tableFrom": "local_rank_results",
-          "tableTo": "local_rank_businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "local_rank_businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5736,54 +5481,54 @@
         "local_rank_scans_check_id_local_rank_checks_id_fk": {
           "name": "local_rank_scans_check_id_local_rank_checks_id_fk",
           "tableFrom": "local_rank_scans",
-          "tableTo": "local_rank_checks",
           "columnsFrom": [
             "check_id"
           ],
+          "tableTo": "local_rank_checks",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "local_rank_scans_project_id_projects_id_fk": {
           "name": "local_rank_scans_project_id_projects_id_fk",
           "tableFrom": "local_rank_scans",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "local_rank_scans_tracker_id_local_rank_trackers_id_fk": {
           "name": "local_rank_scans_tracker_id_local_rank_trackers_id_fk",
           "tableFrom": "local_rank_scans",
-          "tableTo": "local_rank_trackers",
           "columnsFrom": [
             "tracker_id"
           ],
+          "tableTo": "local_rank_trackers",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "local_rank_scans_keyword_id_local_rank_keywords_id_fk": {
           "name": "local_rank_scans_keyword_id_local_rank_keywords_id_fk",
           "tableFrom": "local_rank_scans",
-          "tableTo": "local_rank_keywords",
           "columnsFrom": [
             "keyword_id"
           ],
+          "tableTo": "local_rank_keywords",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5891,15 +5636,15 @@
         "local_rank_trackers_project_id_projects_id_fk": {
           "name": "local_rank_trackers_project_id_projects_id_fk",
           "tableFrom": "local_rank_trackers",
-          "tableTo": "projects",
           "columnsFrom": [
             "project_id"
           ],
+          "tableTo": "projects",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -5910,9 +5655,9 @@
   "views": {},
   "enums": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
+    "tables": {}
   },
   "internal": {
     "indexes": {}

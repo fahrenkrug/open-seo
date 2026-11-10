@@ -1,5 +1,8 @@
 import { markOnboardingMilestone } from "@/server/email/onboarding-drip";
-import { isAuditRenderingAllowed } from "@/server/lib/audit/rendering-policy";
+import {
+  auditRenderingUnavailableMessage,
+  isAuditRenderingAllowed,
+} from "@/server/lib/audit/rendering-policy";
 import {
   lockRenderingCredits,
   releaseRenderingLocks,
@@ -21,7 +24,6 @@ import {
 } from "@/server/features/audit/services/audit-capacity";
 import { AppError } from "@/server/lib/errors";
 import { deleteR2Prefix } from "@/server/lib/r2";
-import { RENDERED_MAX_AUDIT_PAGES } from "@/shared/audit-limits";
 import { AuditProgressKV } from "@/server/lib/audit/progress-kv";
 import {
   parseAuditConfig,
@@ -31,6 +33,7 @@ import {
 import { normalizeAndValidateStartUrl } from "@/server/lib/audit/url-policy";
 import { reconcileRunningAudit } from "@/server/features/audit/services/auditReconciler";
 import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
+import { startWorkflow } from "@/server/lib/startWorkflow";
 
 // Free accounts keep bounded audit capacity; rendering reserves usage credits.
 async function resolveAuditLimitTier(
@@ -55,19 +58,13 @@ async function startAudit(input: {
   if (renderJavaScript && !(await isAuditRenderingAllowed())) {
     throw new AppError(
       "AUDIT_RENDERING_UNAVAILABLE",
-      "JavaScript rendering is not available on this deployment. It needs a Cloudflare deployment with Browser Run, or CONTEXT_API_KEY. Run the audit without rendering instead.",
+      await auditRenderingUnavailableMessage(),
     );
   }
   const limits = AUDIT_LIMITS[input.limitTier];
   const maxPages = clampAuditMaxPages(input.maxPages);
   if (maxPages > limits.maxPagesPerAudit) {
     throw new AppError("AUDIT_PAGE_LIMIT_EXCEEDED");
-  }
-  if (renderJavaScript && maxPages > RENDERED_MAX_AUDIT_PAGES) {
-    throw new AppError(
-      "AUDIT_PAGE_LIMIT_EXCEEDED",
-      `Audits that render JavaScript are limited to ${RENDERED_MAX_AUDIT_PAGES.toLocaleString("en-US")} pages.`,
-    );
   }
 
   const lighthouseStrategy = input.lighthouseStrategy ?? "auto";
@@ -133,23 +130,27 @@ async function startAudit(input: {
       });
     }
 
-    await env.SITE_AUDIT_WORKFLOW.create({
-      id: auditId,
-      params: {
-        auditId,
-        billingCustomer: {
-          userId: input.billingCustomer.userId,
-          userEmail: input.billingCustomer.userEmail,
-          organizationId: input.billingCustomer.organizationId,
-          projectId: input.billingCustomer.projectId,
+    await startWorkflow(
+      env.SITE_AUDIT_WORKFLOW,
+      {
+        id: auditId,
+        params: {
+          auditId,
+          billingCustomer: {
+            userId: input.billingCustomer.userId,
+            userEmail: input.billingCustomer.userEmail,
+            organizationId: input.billingCustomer.organizationId,
+            projectId: input.billingCustomer.projectId,
+          },
+          projectId: input.projectId,
+          startUrl,
+          config,
+          access: credential?.sealed,
+          renderLocks,
         },
-        projectId: input.projectId,
-        startUrl,
-        config,
-        access: credential?.sealed,
-        renderLocks,
       },
-    });
+      "site audit",
+    );
   } catch (error) {
     try {
       const instance = await env.SITE_AUDIT_WORKFLOW.get(auditId);
@@ -196,34 +197,6 @@ async function getStatus(auditId: string, projectId: string) {
     errorCode: audit.errorCode,
     startedAt: audit.startedAt,
     completedAt: audit.completedAt,
-  };
-}
-
-async function getResults(auditId: string, projectId: string) {
-  const { audit, pages, lighthouse, issues } =
-    await AuditRepository.getAuditResultsForProject(auditId, projectId);
-
-  if (!audit) throw new AppError("NOT_FOUND");
-
-  const parsedConfig = parseAuditConfig(audit.config);
-  if (!parsedConfig) {
-    throw new AppError("INTERNAL_ERROR", "Invalid audit configuration");
-  }
-
-  return {
-    audit: {
-      id: audit.id,
-      startUrl: audit.startUrl,
-      status: audit.status,
-      pagesCrawled: audit.pagesCrawled,
-      pagesTotal: audit.pagesTotal,
-      startedAt: audit.startedAt,
-      completedAt: audit.completedAt,
-      config: parsedConfig,
-    },
-    pages,
-    lighthouse,
-    issues,
   };
 }
 
@@ -306,7 +279,7 @@ async function remove(auditId: string, projectId: string) {
     console.warn(`Failed to destroy audit scratchpad ${auditId}:`, error);
   }
   // Best-effort: the stored Lighthouse reports. A miss is swept when the
-  // account is erased (storage-erasure.ts).
+  // account is erased (account-deletion/storage.ts).
   try {
     await deleteR2Prefix(env.R2, `site-audit/${projectId}/${auditId}/`);
   } catch (error) {
@@ -319,7 +292,6 @@ export const AuditService = {
   startAudit,
   getStatus,
   getCrawlProgress,
-  getResults,
   getHistory,
   remove,
 } as const;

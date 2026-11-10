@@ -11,6 +11,8 @@ import {
   searchLocalPoints,
 } from "@/server/features/local-seo/services/localSeoCollection";
 import { pgStep } from "./pgStep";
+import { yieldingStep } from "./yieldingStep";
+import { describeError } from "@/server/lib/errors";
 
 type LocalRankPayload = {
   checkId: string;
@@ -28,7 +30,8 @@ export class LocalRankWorkflow extends WorkflowEntrypoint<
   Env,
   LocalRankPayload
 > {
-  async run(event: WorkflowEvent<LocalRankPayload>, step: WorkflowStep) {
+  async run(event: WorkflowEvent<LocalRankPayload>, engineStep: WorkflowStep) {
+    const step = yieldingStep(engineStep);
     const { checkId, customer } = event.payload;
     const projectId = customer.projectId;
     if (!projectId) return;
@@ -64,7 +67,10 @@ export class LocalRankWorkflow extends WorkflowEntrypoint<
         finalizeLocalCheck(projectId, checkId),
       );
     } catch (error) {
-      console.error(`[local-seo] check ${checkId} failed:`, error);
+      console.error(
+        `[local-seo] check ${checkId} failed: ${describeError(error)}`,
+        error,
+      );
       await pgStep(step, "fail", undefined, () =>
         finalizeLocalCheck(
           projectId,

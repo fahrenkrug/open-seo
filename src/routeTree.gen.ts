@@ -13,6 +13,7 @@ import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthErrorRouteImport } from './routes/auth-error'
+import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
@@ -32,6 +33,7 @@ import { Route as AuthenticatedYcRouteImport } from './routes/_authenticated.yc'
 import { Route as AcceptInvitationIdRouteImport } from './routes/accept-invitation.$id'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiPrivacyRegionRouteImport } from './routes/api/privacy-region'
+import { Route as ApiSignUpStatusRouteImport } from './routes/api/sign-up-status'
 import { Route as RReportIdRouteImport } from './routes/r/$reportId'
 import { Route as AppBillingFixPaymentRouteImport } from './routes/_app/billing_.fix-payment'
 import { Route as AppHelpDataforseoApiKeyRouteImport } from './routes/_app/help/dataforseo-api-key'
@@ -95,6 +97,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const AuthErrorRoute = AuthErrorRouteImport.update({
   id: '/auth-error',
   path: '/auth-error',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectRoute = ConnectRouteImport.update({
+  id: '/connect',
+  path: '/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -193,6 +200,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
 const ApiPrivacyRegionRoute = ApiPrivacyRegionRouteImport.update({
   id: '/api/privacy-region',
   path: '/api/privacy-region',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSignUpStatusRoute = ApiSignUpStatusRouteImport.update({
+  id: '/api/sign-up-status',
+  path: '/api/sign-up-status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RReportIdRoute = RReportIdRouteImport.update({
@@ -455,6 +467,7 @@ const ApiLocalSeoMapsProjectIdZXYRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/auth-error': typeof AuthErrorRoute
+  '/connect': typeof ConnectRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -473,6 +486,7 @@ export interface FileRoutesByFullPath {
   '/accept-invitation/$id': typeof AcceptInvitationIdRoute
   '/api/health': typeof ApiHealthRoute
   '/api/privacy-region': typeof ApiPrivacyRegionRoute
+  '/api/sign-up-status': typeof ApiSignUpStatusRoute
   '/r/$reportId': typeof RReportIdRoute
   '/p/$projectId': typeof AppPProjectIdRouteRouteWithChildren
   '/billing/fix-payment': typeof AppBillingFixPaymentRoute
@@ -524,6 +538,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/auth-error': typeof AuthErrorRoute
+  '/connect': typeof ConnectRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -541,6 +556,7 @@ export interface FileRoutesByTo {
   '/accept-invitation/$id': typeof AcceptInvitationIdRoute
   '/api/health': typeof ApiHealthRoute
   '/api/privacy-region': typeof ApiPrivacyRegionRoute
+  '/api/sign-up-status': typeof ApiSignUpStatusRoute
   '/r/$reportId': typeof RReportIdRoute
   '/billing/fix-payment': typeof AppBillingFixPaymentRoute
   '/help/dataforseo-api-key': typeof AppHelpDataforseoApiKeyRoute
@@ -590,6 +606,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth-error': typeof AuthErrorRoute
+  '/connect': typeof ConnectRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -608,6 +625,7 @@ export interface FileRoutesById {
   '/accept-invitation/$id': typeof AcceptInvitationIdRoute
   '/api/health': typeof ApiHealthRoute
   '/api/privacy-region': typeof ApiPrivacyRegionRoute
+  '/api/sign-up-status': typeof ApiSignUpStatusRoute
   '/r/$reportId': typeof RReportIdRoute
   '/_app/': typeof AppIndexRoute
   '/_app/p/$projectId': typeof AppPProjectIdRouteRouteWithChildren
@@ -662,6 +680,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth-error'
+    | '/connect'
     | '/forgot-password'
     | '/reset-password'
     | '/verify-email'
@@ -680,6 +699,7 @@ export interface FileRouteTypes {
     | '/accept-invitation/$id'
     | '/api/health'
     | '/api/privacy-region'
+    | '/api/sign-up-status'
     | '/r/$reportId'
     | '/p/$projectId'
     | '/billing/fix-payment'
@@ -731,6 +751,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth-error'
+    | '/connect'
     | '/forgot-password'
     | '/reset-password'
     | '/verify-email'
@@ -748,6 +769,7 @@ export interface FileRouteTypes {
     | '/accept-invitation/$id'
     | '/api/health'
     | '/api/privacy-region'
+    | '/api/sign-up-status'
     | '/r/$reportId'
     | '/billing/fix-payment'
     | '/help/dataforseo-api-key'
@@ -796,6 +818,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_authenticated'
     | '/auth-error'
+    | '/connect'
     | '/forgot-password'
     | '/reset-password'
     | '/verify-email'
@@ -814,6 +837,7 @@ export interface FileRouteTypes {
     | '/accept-invitation/$id'
     | '/api/health'
     | '/api/privacy-region'
+    | '/api/sign-up-status'
     | '/r/$reportId'
     | '/_app/'
     | '/_app/p/$projectId'
@@ -869,6 +893,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthErrorRoute: typeof AuthErrorRoute
+  ConnectRoute: typeof ConnectRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
@@ -877,6 +902,7 @@ export interface RootRouteChildren {
   AcceptInvitationIdRoute: typeof AcceptInvitationIdRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiPrivacyRegionRoute: typeof ApiPrivacyRegionRoute
+  ApiSignUpStatusRoute: typeof ApiSignUpStatusRoute
   RReportIdRoute: typeof RReportIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAutumnSplatRoute: typeof ApiAutumnSplatRoute
@@ -918,6 +944,13 @@ declare module '@tanstack/react-router' {
       path: '/auth-error'
       fullPath: '/auth-error'
       preLoaderRoute: typeof AuthErrorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect': {
+      id: '/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof ConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1051,6 +1084,13 @@ declare module '@tanstack/react-router' {
       path: '/api/privacy-region'
       fullPath: '/api/privacy-region'
       preLoaderRoute: typeof ApiPrivacyRegionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sign-up-status': {
+      id: '/api/sign-up-status'
+      path: '/api/sign-up-status'
+      fullPath: '/api/sign-up-status'
+      preLoaderRoute: typeof ApiSignUpStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$reportId': {
@@ -1581,6 +1621,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthErrorRoute: AuthErrorRoute,
+  ConnectRoute: ConnectRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
@@ -1591,6 +1632,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcceptInvitationIdRoute: AcceptInvitationIdRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiPrivacyRegionRoute: ApiPrivacyRegionRoute,
+  ApiSignUpStatusRoute: ApiSignUpStatusRoute,
   RReportIdRoute: RReportIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAutumnSplatRoute: ApiAutumnSplatRoute,

@@ -90,7 +90,7 @@ This local connection is separate from ChatGPT web. See [OpenAI's MCP documentat
 
 ## Connect with an API key
 
-Use an API key in headless environments, CI, or clients where OAuth is inconvenient. API keys are personal: anything an agent does with your key acts as you in your workspace.
+Use an API key in headless environments, CI, or clients where OAuth is inconvenient. API keys are personal: anything an agent does with your key acts as you in the workspace that was active when you created it.
 
 In the [OpenSEO app](https://app.openseo.so/settings), open **Settings -> API keys**, create a key, and copy it when it appears. It won't be shown again.
 
@@ -124,6 +124,10 @@ codex mcp add openseo --url https://app.openseo.so/mcp --bearer-token-env-var OP
 
 Any other client that supports custom HTTP headers can send `Authorization: Bearer oseo_YOUR_KEY` or `x-api-key: oseo_YOUR_KEY`.
 
+## Workspaces and revoking access
+
+An OAuth connection or API key is tied to the workspace that was active when you authorized or created it. To use OpenSEO in another workspace, connect again and pick that workspace on the authorization page, or switch to it in the app before creating a key. To disconnect an agent, open [Settings](https://app.openseo.so/settings) and choose **Disconnect** under **Connected agents**. To revoke a key, choose **Revoke key** under **API keys**. A disconnected agent has to sign in again before it can call OpenSEO.
+
 ## Available tools
 
 OpenSEO MCP exposes tools for SEO research workflows:
@@ -141,7 +145,7 @@ OpenSEO MCP exposes tools for SEO research workflows:
 - Hydrate keywords with search volume, difficulty, intent, CPC, and trends.
 - List saved keywords from an OpenSEO project.
 - Save useful keywords back to OpenSEO.
-- Read rank tracker configs and latest keyword positions.
+- Create and run rank trackers, add or remove keywords, and read the latest positions and rank history. Estimating a check's cost is free; running one uses credits.
 - Summarize a domain's organic footprint.
 - Find keywords a domain already ranks for.
 - Check backlink and referring-domain overview data.

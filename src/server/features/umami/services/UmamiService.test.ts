@@ -56,7 +56,7 @@ beforeAll(async () => {
     CREATE TABLE projects (id TEXT PRIMARY KEY);
   `);
   const migration = readFileSync(
-    join(process.cwd(), "drizzle/sqlite/0062_umami_connections.sql"),
+    join(process.cwd(), "drizzle/sqlite/0069_umami_connections.sql"),
     "utf8",
   );
   await client.executeMultiple(

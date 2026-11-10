@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { PageLoading } from "@/client/components/Spinner";
 import { useAppForm } from "@/client/components/form/useAppForm";
 import { Button } from "@/client/components/ui/button";
 import {
@@ -17,12 +19,18 @@ import {
   useTurnstileCaptcha,
 } from "@/client/features/auth/TurnstileWidget";
 import { passwordSchema } from "@/client/features/auth/passwordSchema";
+import { signUpStatusQueryOptions } from "@/client/features/auth/signUpStatus";
 import { useGoogleAuth } from "@/client/features/auth/useGoogleAuth";
 import { getFormError } from "@/client/lib/forms";
 import { captureClientEvent } from "@/client/lib/posthog";
 import { authClient } from "@/lib/auth-client";
-import { getSignInSearch, getVerifyEmailSearch } from "@/lib/auth-redirect";
+import {
+  getSignInSearch,
+  getVerifyEmailSearch,
+  toAuthCallbackURL,
+} from "@/lib/auth-redirect";
 import { z } from "zod";
+import { pageHead } from "@/client/lib/pageHead";
 
 const UTM_PARAMS = [
   "utm_source",
@@ -43,6 +51,7 @@ const signUpSchema = z
   });
 
 export const Route = createFileRoute("/_auth/sign-up")({
+  head: () => pageHead("Sign up"),
   validateSearch: authRedirectSearchSchema.extend({
     // A site checked with the marketing site's free tool; onboarding
     // prefills it, and the website step validates it on save.
@@ -54,6 +63,9 @@ export const Route = createFileRoute("/_auth/sign-up")({
     utm_medium: z.string().optional().catch(undefined),
     utm_campaign: z.string().optional().catch(undefined),
     utm_content: z.string().optional().catch(undefined),
+    // The method a visitor already picked on the marketing site's ad landing
+    // page, so they don't have to pick it again here.
+    method: z.enum(["google", "email"]).optional().catch(undefined),
   }),
   component: SignUpPage,
 });
@@ -61,7 +73,9 @@ export const Route = createFileRoute("/_auth/sign-up")({
 function SignUpPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
-  const { redirectTo, isHostedMode } = useAuthPageState(search.redirect);
+  const { redirectTo, isHostedMode, isBetterAuthMode } = useAuthPageState(
+    search.redirect,
+  );
   const onboardingSearch = new URLSearchParams();
   if (search.domain) onboardingSearch.set("domain", search.domain);
   for (const name of UTM_PARAMS) {
@@ -74,8 +88,36 @@ function SignUpPage() {
       : onboardingSearch.size > 0
         ? `/onboarding?${onboardingSearch.toString()}`
         : "/onboarding";
-  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(search.method === "email");
   const google = useGoogleAuth({ redirectTo, postSignupRedirect });
+
+  // Sent from a "Continue with Google" button: go straight to Google. `method`
+  // leaves the URL first, so Back from Google's page shows the buttons here
+  // instead of opening Google again.
+  const startedGoogle = useRef(false);
+  useEffect(() => {
+    if (search.method !== "google" || !isHostedMode || startedGoogle.current) {
+      return;
+    }
+    startedGoogle.current = true;
+    void navigate({
+      to: "/sign-up",
+      search: { ...search, method: undefined },
+      replace: true,
+    });
+    void google.start();
+  }, [google, isHostedMode, navigate, search]);
+  // The standalone Docker edition: no Google, no email verification, and the
+  // server accepts a sign-up only for the first account or an invited address
+  // (src/server/standalone/sign-up.ts).
+  const standalone = isBetterAuthMode && !isHostedMode;
+  const invited = redirectTo.startsWith("/accept-invitation/");
+  const signUpStatus = useQuery({
+    ...signUpStatusQueryOptions(),
+    enabled: standalone,
+  });
+  const firstAccount = signUpStatus.data?.firstAccount === true;
+  const emailFormVisible = showEmailForm || standalone;
 
   // Turnstile is active only in hosted mode with a configured site key.
   const isTurnstileEnabled = isHostedMode && Boolean(TURNSTILE_SITE_KEY);
@@ -140,6 +182,27 @@ function SignUpPage() {
         captureClientEvent("auth:sign_up_success", {
           redirect_to: redirectTo,
         });
+        if (standalone) {
+          // Nothing to verify here, and autoSignIn is off so the operator's
+          // create-user never mints a session: sign in explicitly, and the
+          // layout sends the new session to redirectTo.
+          const signedIn = await authClient.signIn.email({
+            email,
+            password: value.password,
+            callbackURL: toAuthCallbackURL(redirectTo),
+          });
+          if (signedIn.error) {
+            formApi.setErrorMap({
+              onSubmit: {
+                form:
+                  signedIn.error.message ||
+                  "Account created. Sign in to continue.",
+                fields: {},
+              },
+            });
+          }
+          return;
+        }
         void navigate({
           to: "/verify-email",
           search: getVerifyEmailSearch(email, postSignupRedirect),
@@ -157,11 +220,54 @@ function SignUpPage() {
     },
   });
 
+  if (standalone && !firstAccount && !invited) {
+    if (signUpStatus.isPending) return <PageLoading />;
+    return (
+      <AuthPageCard
+        title="Registration is closed"
+        helperText="Ask an administrator for an invitation."
+        footer={
+          <p className="text-sm">
+            <Link
+              to="/sign-in"
+              search={getSignInSearch(redirectTo)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Back to sign in
+            </Link>
+          </p>
+        }
+      >
+        {null}
+      </AuthPageCard>
+    );
+  }
+
   return (
     <AuthPageCard
-      title="Create your account"
+      title={firstAccount ? "Create the admin account" : "Create your account"}
+      helperText={
+        firstAccount
+          ? "This installation has no accounts yet. The first one becomes the administrator."
+          : invited
+            ? "Use the email address that received the invitation."
+            : undefined
+      }
       footer={
-        isHostedMode ? (
+        standalone ? (
+          firstAccount ? null : (
+            <p className="text-sm text-foreground/50">
+              Already have an account?{" "}
+              <Link
+                to="/sign-in"
+                search={getSignInSearch(redirectTo)}
+                className="text-foreground underline underline-offset-2 hover:text-foreground/80 transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+          )
+        ) : isHostedMode ? (
           showEmailForm ? (
             <button
               type="button"
@@ -190,7 +296,7 @@ function SignUpPage() {
         ) : null
       }
     >
-      {!showEmailForm ? (
+      {!emailFormVisible ? (
         <>
           <AuthMethodChooser
             googleLabel="Continue with Google"
@@ -283,7 +389,9 @@ function SignUpPage() {
                     >
                       {isSubmitting ? "Creating account..." : "Create account"}
                     </Button>
-                    <TermsAgreementNotice action="By creating an account" />
+                    {isHostedMode ? (
+                      <TermsAgreementNotice action="By creating an account" />
+                    ) : null}
                   </>
                 );
               }}
